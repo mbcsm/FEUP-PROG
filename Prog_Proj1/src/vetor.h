@@ -102,5 +102,13 @@ int vetor_pesquisa(vetor *vec, const char* str);
  */
 int vetor_ordena(vetor *vec);
 
+
+/**
+ * Guarda vetor num ficheiro
+ *  parametro: vec apontador para vetor
+ *  retorno: -1 se ocorrer um erro ou 0 se for bem sucedido
+ */
+int vetor_guarda_ficheiro(vetor *vec, char const* fileName);
+
 #define VETOR_H
 #endif

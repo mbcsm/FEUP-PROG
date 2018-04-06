@@ -6,6 +6,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 vetor* vetor_novo()
 {
@@ -131,7 +134,7 @@ int vetor_remove(vetor* vec, int pos)
 	/* liberta string na posicao a remover */
 	free(vec->elementos[pos].str);
 
-	/* copia todos os elementos a partir da posição pos+1 até ao fim do vetor para pos */
+	/* copia todos os elementos a partir da posiÃ§Ã£o pos+1 atÃ© ao fim do vetor para pos */
 	for(i=pos+1; i<vec->tamanho; i++)
 	{
 		vec->elementos[i-1] = vec->elementos[i];
@@ -178,5 +181,22 @@ int vetor_ordena(vetor* vec)
 		vec->elementos[j].str = tmp;
     }
 
+	return 0;
+}
+int vetor_guarda_ficheiro(vetor* vec, char const* fileName){
+
+	  ofstream file;
+	  file.open (fileName);
+
+	if (file.is_open())
+	{
+		for(int i = 0; i < vec->tamanho; i++){
+			file << vetor_elemento(vec, i) << "\n";
+		}
+	}
+	else
+		cout << "Unable to open file";
+
+	file.close();
 	return 0;
 }
