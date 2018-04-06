@@ -102,7 +102,7 @@ int vetor_pesquisa(vetor *vec, const char* str);
  */
 int vetor_ordena(vetor *vec);
 
-
+vetor* vetor_cria_ficheiro(char const* fileName);
 /**
  * Guarda vetor num ficheiro
  *  parametro: vec apontador para vetor

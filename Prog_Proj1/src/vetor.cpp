@@ -183,6 +183,49 @@ int vetor_ordena(vetor* vec)
 
 	return 0;
 }
+vetor* vetor_cria_ficheiro(char const* fileName){
+
+	vetor* vec = vetor_novo();
+
+	int 	numberWords = 0,
+			numberNonDuplicates = 0;
+
+	FILE *wordlist = fopen("wordlist.txt", "r");
+	if(!wordlist)
+	{
+		cout << "Error: Could Not Open File\n";
+		return vec;
+	}
+
+	cout << "Going through the data please wait..."<< endl;
+
+	char line[100];
+	while (fgets(line, sizeof(line), wordlist)) {
+		if(line[strlen(line)-1] == '\n')
+			line[strlen(line)-1]  = ',';
+
+		char * word;
+		word = strtok (line," ,.-;'");
+
+		numberWords++;
+
+		while (word != NULL)
+		{
+			if(vetor_pesquisa(vec, word) == -1){
+				vetor_insere(vec, word, vec->tamanho);
+				numberNonDuplicates++;
+			}
+
+
+			word = strtok (NULL," ,.-;'");
+		}
+	}
+
+	fclose(wordlist);
+
+	return vec;
+}
+
 int vetor_guarda_ficheiro(vetor* vec, char const* fileName){
 
 	  ofstream file;
