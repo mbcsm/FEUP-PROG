@@ -1,0 +1,267 @@
+-- ****************** CLEAR TABLES *******************;
+-- ***************************************************;
+
+DROP TABLE `Liga`;
+DROP TABLE `Escalao`;
+DROP TABLE `Campo`;
+DROP TABLE `Equipa`;
+DROP TABLE `Clube`;
+
+
+
+-- ************************************** `Clube`
+
+CREATE TABLE `Clube`
+(
+ `IdClube` BIGINT PRIMARY KEY AUTOINCREMENT,
+ `Nome`    CHAR NOT NULL ,
+ `Regiao`  CHAR NOT NULL
+
+);
+
+
+
+
+
+-- ************************************** `Campo`
+
+CREATE TABLE `Campo`
+(
+ `IdCampo`    BIGINT PRIMARY KEY AUTOINCREMENT,
+ `IdClube`    BIGINT REFERENCES Clube(IdClube) NOT NULL ,
+ `Localidade` CHAR NOT NULL ,
+ `Relvado`    CHAR NOT NULL
+);
+
+
+
+
+
+-- ************************************** `Equipa`
+
+CREATE TABLE `Equipa`
+(
+ `IdEquipa` BIGINT PRIMARY KEY AUTOINCREMENT,
+ `IdClube`  BIGINT REFERENCES Clube(IdClube) NOT NULL ,
+ `Nome`     CHAR NOT NULL
+);
+
+
+
+
+
+-- ************************************** `Liga`
+
+CREATE TABLE `Liga`
+(
+ `IdLiga`   BIGINT PRIMARY KEY ,
+ `IdEquipa` BIGINT REFERENCES Equipa(IdEquipa) NOT NULL ,
+ `IdClube`  BIGINT NOT NULL ,
+ `Nome`     CHAR NOT NULL ,
+ `Regiao`   CHAR NOT NULL 
+);
+
+
+
+
+
+-- ************************************** `Escalao`
+
+CREATE TABLE `Escalao`
+(
+ `IdEscalao`   BIGINT NOT NULL ,
+ `IdEquipa`    BIGINT NOT NULL ,
+ `IdClube`     BIGINT NOT NULL ,
+ `FaixaEtaria` CHAR NOT NULL ,
+ `Sexo`        CHAR NOT NULL ,
+
+PRIMARY KEY (`IdEscalao`, `IdEquipa`, `IdClube`),
+FOREIGN KEY (`IdEquipa`, `IdClube`) REFERENCES `Equipa` (`IdEquipa`, `IdClube`)
+);
+
+
+
+-- ************************************** `Liga`
+
+CREATE TABLE `Jogo`
+(
+ `IdJogo`    BIGINT NOT NULL ,
+ `IdLiga`    BIGINT NOT NULL ,
+ `IdEquipa`  BIGINT NOT NULL ,
+ `IdClube`   BIGINT NOT NULL ,
+ `IdCampo`   BIGINT NOT NULL ,
+ `Data`      DATETIME NOT NULL ,
+ `Resultado` CHAR NOT NULL ,
+
+PRIMARY KEY (`IdJogo`, `IdLiga`, `IdEquipa`, `IdClube`, `IdCampo`),
+FOREIGN KEY (`IdLiga`, `IdEquipa`, `IdClube`) REFERENCES `Liga` (`IdLiga`, `IdEquipa`, `IdClube`),
+FOREIGN KEY (`IdCampo`, `IdClube`) REFERENCES `Campo` (`IdCampo`, `IdClube`)
+);
+
+
+-- ************************************** `Pessoa`
+
+CREATE TABLE `Pessoa`
+(
+ `IdPessoa`         BIGINT NOT NULL ,
+ `Nacionalidade`    CHAR NOT NULL ,
+ `Peso`             CHAR NOT NULL ,
+ `Idade`            CHAR NOT NULL ,
+
+PRIMARY KEY (`IdPessoa`)
+);
+
+
+
+
+-- ************************************** `jogador`
+
+CREATE TABLE `jogador`
+(
+ `IdPessoa`         BIGINT NOT NULL ,
+ `Nacionalidade`    CHAR NOT NULL ,
+ `Peso`             CHAR NOT NULL ,
+ `Idade`            CHAR NOT NULL ,
+
+PRIMARY KEY (`IdPessoa`)
+);
+
+
+
+
+
+/*
+DROP TABLE IF EXISTS REPUTACAOPERFIL;
+DROP TABLE IF EXISTS REPUTACAOPOST;
+DROP TABLE IF EXISTS PERFILCHAT;
+DROP TABLE IF EXISTS POSTEVENTO;
+DROP TABLE IF EXISTS POSTGRUPO;
+DROP TABLE IF EXISTS POSTPERFIL;
+DROP TABLE IF EXISTS PERFILGRUPO;
+
+DROP TABLE IF EXISTS AMIZADE;
+DROP TABLE IF EXISTS REPUTACAO;
+DROP TABLE IF EXISTS MENSAGEM;
+DROP TABLE IF EXISTS CHAT;
+DROP TABLE IF EXISTS EVENTO;
+DROP TABLE IF EXISTS POST;
+DROP TABLE IF EXISTS GRUPO;
+DROP TABLE IF EXISTS PERFIL;
+DROP TABLE IF EXISTS NATURALIDADE;
+
+--CRIA CADA UMA DAS TABELAS
+
+CREATE TABLE NATURALIDADE (
+	idNaturalidade INTEGER PRIMARY KEY,
+	cidade TEXT NOT NULL
+);
+
+CREATE TABLE PERFIL (
+	idPerfil INTEGER PRIMARY KEY,
+	idNaturalidade INTEGER REFERENCES NATURALIDADE(idNaturalidade) NOT NULL,
+	contacto INTEGER NOT NULL,
+	dataDeNascimento DATE NOT NULL,
+	morada TEXT NOT NULL,
+	nome TEXT NOT NULL,
+	reputacao INTEGER DEFAULT 0,
+	avatar TEXT --URL DO AVATAR
+);
+
+--AINDA NAO IMPEDE QUE HAJA DUAS AMIZADES DIFERENTES COM OS MESMOS 2 PERFIS, POSTERIORMENTE RESOLVEREMOS COM UM TRIGGER
+CREATE TABLE AMIZADE (
+	idPerfilPede INTEGER REFERENCES PERFIL(idPerfil),
+	idPerfilAceita INTEGER REFERENCES PERFIL(idPerfil) CHECK (idPerfilAceita != idPerfilPede),
+	aceita BOOLEAN DEFAULT FALSE,
+	CONSTRAINT AMIZADE_PK PRIMARY KEY (idPerfilPede, idPerfilAceita)
+);
+
+--NAO AUMENTA O NUMRERO DE MENSAGENS NAO AUMENTA, POSTERIORMENTE RESOLVEREMOS COM TRIGGERS
+CREATE TABLE CHAT (
+	idChat INTEGER PRIMARY KEY,
+	nome TEXT,
+	numeroDeMensagens INTEGER DEFAULT 0
+);
+
+CREATE TABLE MENSAGEM (
+	idMensagem INTEGER PRIMARY KEY,
+	idChat INTEGER REFERENCES CHAT(idChat),
+	data DATE NOT NULL,
+	hora TEXT NOT NULL,
+	texto TEXT NOT NULL
+);
+
+CREATE TABLE EVENTO (
+	idEvento INTEGER PRIMARY KEY,
+	idCriador INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	data DATE NOT NULL,
+	descricao TEXT,
+	local TEXT NOT NULL,
+	nome TEXT NOT NULL
+);
+
+CREATE TABLE GRUPO (
+	idGrupo INTEGER PRIMARY KEY,
+	idAdministrador INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	descricao TEXT,
+	nome TEXT NOT NULL,
+	privacidade TEXT DEFAULT 'Publico'
+);
+
+CREATE TABLE POST (
+	idPost INTEGER PRIMARY KEY,
+	idCriador INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	data DATE NOT NULL,
+	hora TEXT NOT NULL,
+	reputacao INTEGER DEFAULT 0,
+	texto TEXT NOT NULL
+);
+
+CREATE TABLE POSTPERFIL (
+	idPost INTEGER REFERENCES POST(idPost) UNIQUE NOT NULL,
+	idPerfil INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	CONSTRAINT POSTPERFIL_PK PRIMARY KEY (idPost, idPerfil)
+);
+
+CREATE TABLE POSTGRUPO (
+	idPost INTEGER REFERENCES POST(idPost) UNIQUE NOT NULL,
+	idGrupo INTEGER REFERENCES GRUPO(idGrupo) NOT NULL,
+	CONSTRAINT POSTGRUPO_PK PRIMARY KEY (idPost, idGrupo)
+);
+
+CREATE TABLE POSTEVENTO (
+	idPost INTEGER REFERENCES POST(idPost) UNIQUE NOT NULL,
+	idEvento INTEGER REFERENCES EVENTO(idEvento) NOT NULL,
+	CONSTRAINT POSTEVENTO_PK PRIMARY KEY (idPost, idEvento)
+);
+
+CREATE TABLE PERFILCHAT (
+	idPerfil INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	idChat INTEGER REFERENCES CHAT(idChat) NOT NULL,
+	CONSTRAINT PERFILCHAT_PK PRIMARY KEY (idPerfil, idChat)
+);
+
+CREATE TABLE PERFILGRUPO (
+	idPerfil INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	idGrupo INTEGER REFERENCES GRUPO(idGrupo) NOT NULL,
+	CONSTRAINT PERFILGRUPO_PK PRIMARY KEY (idPerfil, idGrupo)
+);
+
+CREATE TABLE REPUTACAO (
+	idReputacao INTEGER PRIMARY KEY,
+	aceita BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE REPUTACAOPERFIL (
+	idAtribuiu INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	idPerfil INTEGER REFERENCES PERFIL(idPerfil) NOT NULL CHECK (idAtribuiu != idPerfil),
+	idReputacao INTEGER REFERENCES REPUTACAO(idReputacao) UNIQUE NOT NULL,
+	CONSTRAINT REPUTACAOPERFIL_PK PRIMARY KEY (idAtribuiu, idPerfil, idReputacao)
+);
+
+CREATE TABLE REPUTACAOPOST (
+	idAtribuiu INTEGER REFERENCES PERFIL(idPerfil) NOT NULL,
+	idPost INTEGER REFERENCES POST(idPost) NOT NULL,
+	idReputacao INTEGER REFERENCES REPUTACAO(idReputacao) UNIQUE NOT NULL,
+	CONSTRAINT REPUTACAOPERFIL_PK PRIMARY KEY (idAtribuiu, idPost, idReputacao)
+);
+*/
