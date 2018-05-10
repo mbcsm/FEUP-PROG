@@ -34,3 +34,14 @@ int Word::getHorientation() const{
 string Word::getWord() const {
 	return this->word;
 }
+
+
+
+
+
+
+
+
+
+
+

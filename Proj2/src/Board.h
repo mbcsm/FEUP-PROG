@@ -20,5 +20,7 @@ class Board
 		int WordExistsInBoard(string word);
 		int WordFits(int x, int y, int horientation, string word);
 		void InsertWord(int x, int y, char Direction, string word);
+		int WordMatchesWithOtherLetters(int x, int y, int horientation, string word);
+		char** CreateBoardMatrix();
 		friend class Dictionary;
 };

@@ -15,28 +15,7 @@ Board::Board(int xSize, int ySize)
 void Board::DrawBoard() 
 {
 
-	char BoardArray[100][100];
-
-	for(int i = 0; i < 100; i++)
-		for(int j = 0; j < 100; j++)
-			BoardArray[i][j]='*';
-
-	for(std::vector<int>::size_type i = 0; i != wordVec.size(); i++){
-		if (wordVec[i].getHorientation() == 0){
-			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
-			{
-				char a = wordVec[i].getWord().at(j);
-				BoardArray[j + wordVec[i].getX()][wordVec[i].getY()] = a;
-			}
-		}
-		else if (wordVec[i].getHorientation() == 1){
-			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
-			{
-				char a = wordVec[i].getWord().at(j);
-				BoardArray[wordVec[i].getX()][j + wordVec[i].getY()] = a;
-			}
-		}
-	}
+	char** BoardArray = CreateBoardMatrix();
 
 	cout << " ";
 	int asciiValue = 97;
@@ -90,7 +69,11 @@ void Board::InsertWord(int x, int y, char Direction, string word)
 		return;
 	}
 
-
+	if(WordMatchesWithOtherLetters(x, y, horientation, word) == 1){
+		cout << " Word Doesn't Match With Other Letters" << endl;
+		return;
+	}
+	for (auto & c: word) c = toupper(c);
 	Word newWord = Word(wordVec.size(), x, y, horientation, word);
 	wordVec.push_back(newWord);
 
@@ -120,6 +103,58 @@ int Board::WordFits(int x, int y, int horientation, string word){
 }
 
 
+int Board::WordMatchesWithOtherLetters(int x, int y, int horientation, string word){
+	char** BoardArray = CreateBoardMatrix();
+
+	for (unsigned int i = 0; i < word.size(); i++)
+	{
+		char a = word.at(i);
+		if(horientation == 0 && (BoardArray[x + i][y] != '*' && BoardArray[x + i][y] != toupper(a)))
+			return 1;
+		else if(horientation == 1 && (BoardArray[x][y + i] != '*' && BoardArray[x][y + i] != toupper(a)))
+			return 1;
+
+
+	}
+
+	return 0;
+}
+
+
+char** Board::CreateBoardMatrix(){
+
+	char** BoardArray = 0;
+	BoardArray = new char*[xSize];
+
+	for (int h = 0; h < ySize; h++)
+	{
+		BoardArray[h] = new char[ySize];
+
+		for (int w = 0; w < ySize; w++)
+		{
+			BoardArray[h][w] = '*';
+		}
+	}
+
+	for(std::vector<int>::size_type i = 0; i != wordVec.size(); i++){
+		if (wordVec[i].getHorientation() == 0){
+			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
+			{
+				char a = wordVec[i].getWord().at(j);
+				BoardArray[j + wordVec[i].getX()][wordVec[i].getY()] = a;
+			}
+		}
+		else if (wordVec[i].getHorientation() == 1){
+			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
+			{
+				char a = wordVec[i].getWord().at(j);
+				BoardArray[wordVec[i].getX()][j + wordVec[i].getY()] = a;
+			}
+		}
+	}
+
+   return BoardArray;
+ }
 
 
 

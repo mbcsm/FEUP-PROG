@@ -26,6 +26,7 @@ public:
 
 	int getHorientation() const;
 
+
 	string getWord() const;
 
 	void setID(int ID);
