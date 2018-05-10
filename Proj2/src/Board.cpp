@@ -157,6 +157,26 @@ char** Board::CreateBoardMatrix(){
  }
 
 
+int Board::CheckEndGame(char** BoardArray){
+
+	for (int h = 0; h < ySize; h++)
+	{
+		for (int w = 0; w < ySize; w++)
+		{
+			if(BoardArray[h][w] == '*')
+				return 1;
+		}
+	}
+
+	endGame = 1;
+	return 0;
+ }
+
+
+int Board::getEndGame(){
+   return endGame;
+ }
+
 
 
 

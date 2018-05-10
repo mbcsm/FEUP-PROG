@@ -18,7 +18,7 @@ int main()
 	Board a = Board(lines, columns);
 	a.DrawBoard();
 
-	while(1){
+	while(a.getEndGame() == 0){
 		int lineInput, columnInput, orientationInput;
 		string untreatedInput, word;
 		cout << "Position (LCD / CTR-Z = Stop) ? ";
@@ -33,6 +33,8 @@ int main()
 		a.InsertWord(lineInput,columnInput,untreatedInput[2], word);
 		a.DrawBoard();
 	}
+
+	cout << "VICTORY - Board Filled";
 	system("pause");
 	return 0;
 }
