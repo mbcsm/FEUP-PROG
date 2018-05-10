@@ -10,11 +10,34 @@ Board::Board(int xSize, int ySize)
 {
 	this->xSize = xSize;
 	this->ySize = ySize;
-	InitializeBoard();
 }
 
 void Board::DrawBoard() 
 {
+
+	char BoardArray[100][100];
+
+	for(int i = 0; i < 100; i++)
+		for(int j = 0; j < 100; j++)
+			BoardArray[i][j]='*';
+
+	for(std::vector<int>::size_type i = 0; i != wordVec.size(); i++){
+		if (wordVec[i].getHorientation() == 0){
+			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
+			{
+				char a = wordVec[i].getWord().at(j);
+				BoardArray[j + wordVec[i].getX()][wordVec[i].getY()] = a;
+			}
+		}
+		else if (wordVec[i].getHorientation() == 1){
+			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
+			{
+				char a = wordVec[i].getWord().at(j);
+				BoardArray[wordVec[i].getX()][j + wordVec[i].getY()] = a;
+			}
+		}
+	}
+
 	cout << " ";
 	int asciiValue = 97;
 	for (int i = 0; i < xSize; i++) {
@@ -40,6 +63,17 @@ void Board::DrawBoard()
 
 void Board::InsertWord(int x, int y, char Direction, string word) 
 {
+	int horientation = -1;
+	if (Direction == 'V' || Direction == 'v')
+		horientation = 0;
+	else if (Direction == 'H' || Direction == 'h')
+		horientation = 1;
+	else
+	{
+		cout << " The direction is incorrect! " << endl;
+		return;
+	}
+
 
 	Dictionary a;
 	a.getWordFromFile("dicionario.txt");
@@ -47,41 +81,57 @@ void Board::InsertWord(int x, int y, char Direction, string word)
 		cout << " The word isn't in the dictionary" << endl;
 		return;
 	}
-
-	if (Direction == 'V' || Direction == 'v')
-	{
-		for (unsigned int i = y; i < word.size(); i++)
-		{
-			char a = word.at(i);
-			BoardArray[i][y] = a;
-		}
-	}
-
-
-
-	else if (Direction == 'H' || Direction == 'h')
-	{
-		for (unsigned int i = x; i < word.size(); i++)
-		{
-			char a = word.at(i);
-			BoardArray[x][i] = a;
-		}
-	}
-
-
-
-
-	else
-	{
-		cout << " The direction is incorrect! " << endl;
+	if(WordExistsInBoard(word) == 1){
+		cout << " Word Already Played" << endl;
 		return;
 	}
+	if(WordFits(x, y, horientation, word) == 1){
+		cout << " Word Doesn't Fit" << endl;
+		return;
+	}
+
+
+	Word newWord = Word(wordVec.size(), x, y, horientation, word);
+	wordVec.push_back(newWord);
+
 }
 
-void Board::InitializeBoard(){
-	for (int i = 0; i < xSize; i++) {
-		for (int j = 0; j < ySize; j++) {
-			BoardArray[i][j] = '*';
-		}
-	}
+
+int Board::WordExistsInBoard(string word){
+	for(std::vector<int>::size_type i = 0; i != wordVec.size(); i++)
+		if(wordVec[i].getWord() == word)
+			return 1;
+
+	return 0;
 }
+
+int Board::WordFits(int x, int y, int horientation, string word){
+	if(x >= xSize || y >= ySize)
+		return 1;
+
+	if(horientation == 0)
+		if(x + word.size() > xSize)
+			return 1;
+	if(horientation == 1)
+		if(y + word.size() > ySize)
+			return 1;
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
