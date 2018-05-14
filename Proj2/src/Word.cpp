@@ -27,21 +27,11 @@ int Word::getY() const {
 	return this->coords.second;
 }
 
-int Word::getHorientation() const{
+
+int Word::getHorientation() const {
 	return this->horientation;
 }
 
 string Word::getWord() const {
 	return this->word;
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 #include "Dictionary.h"
 
-Dictionary::Dictionary() 
+Dictionary::Dictionary()
 {
 	wordlist = {};
 }
@@ -53,7 +53,7 @@ bool Dictionary::FoundWord(string palavra)
 {
 	for (unsigned int i = 0; i < wordlist.size(); i++)
 	{
-		if (palavra == wordlist.at(i))
+		if (palavra == wordlist.at(i) || palavra == "X")
 			return true;
 		else continue;
 	}
