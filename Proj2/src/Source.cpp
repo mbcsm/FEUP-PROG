@@ -4,6 +4,8 @@
 #include "Dictionary.h"
 using namespace std;
 int Create_Puzzle();
+int Resume_Puzzle();
+int Load_Puzzle();
 
 int main()
 {
@@ -18,7 +20,8 @@ int main()
 		cout << "\n\n   WORD GAMES - Menu: \n\n\n" << endl;
 
 		cout << "   1- Create a Puzzle \n" << endl;
-		cout << "   2- Load a Puzzle \n\n" << endl;
+		cout << "   2- Resume a Puzzle \n" << endl;
+		cout << "   3- Load Puzzle \n\n" << endl;
 
 		cout << "   0- Exit \n\n\n" << endl;
 		cout << "   Select an option: "; cin >> op;
@@ -31,7 +34,10 @@ int main()
 			Create_Puzzle();
 			break;
 		case 2:
-			/////////////////////////
+			Resume_Puzzle();
+			break;
+		case 3:
+			Load_Puzzle();
 			break;
 		default:
 
@@ -55,7 +61,7 @@ int Create_Puzzle()
 	string filename;
 	cout << "Insert the file name (dicionario.txt) : ";
 	cin >> filename;
-
+	vector<string> guardpositions;
 	int lines, columns;
 	cout << "board size (lines columns) ? ";
 	cin >> lines;
@@ -69,6 +75,7 @@ int Create_Puzzle()
 		string untreatedInput, word;
 		cout << "Position (LCD / CTR-Z = Stop) ? ";
 		cin >> untreatedInput;
+		guardpositions.push_back(untreatedInput);
 
 		if (untreatedInput == "Z")
 		{
@@ -79,7 +86,7 @@ int Create_Puzzle()
 			if (option == 'y' || option == 'Y')
 			{
 				cout << "Enter file name: "; cin >> outputfile;
-				a.SaveToFile(outputfile);
+				a.SaveToFile(outputfile,guardpositions);
 				return 0;
 			}
 			else if (option == 'n' || option == 'N')
@@ -125,7 +132,7 @@ int Create_Puzzle()
 			vector<string> words = a.WordsThatFit(lineInput, columnInput, horientation);
 			for (unsigned int i = 0; i < words.size(); i++)
 				cout << words.at(i) << endl;
-		
+
 		}
 		else if (word.at(0) == '-')
 		{
@@ -136,7 +143,7 @@ int Create_Puzzle()
 
 		else
 		{
-			a.InsertWord(lineInput, columnInput, horientation, word);
+			a.InsertWord(lineInput, columnInput, untreatedInput[2], word);
 			a.DrawBoard();
 		}
 
@@ -152,7 +159,7 @@ int Create_Puzzle()
 			if (option == 'y' || option == 'Y')
 			{
 				cout << "Enter file name: "; cin >> outputfile;
-				a.SaveToFile(outputfile);
+				a.SaveToFile(outputfile, guardpositions);
 				return 0;
 			}
 			else if (option == 'n' || option == 'N')
@@ -172,3 +179,236 @@ int Create_Puzzle()
 	return 0;
 }
 
+int Resume_Puzzle()
+{
+	system("cls");
+	string filename, boardname;
+	cout << "Insert the file name (dicionario.txt) : ";
+	cin >> filename;
+	cout << "Insert the file name where the board was guarded : ";
+	cin >> boardname;
+	Board a;
+	a.loadBoard(boardname);
+
+	a.DrawBoard();
+	vector<string> guardpositions;
+
+	a.CheckEndGame();
+
+	if (a.getEndGame() == 1) {
+		cout << " The board is already completed. \n";
+		system("pause");
+		return 0;
+
+	}
+
+
+
+	while (a.getEndGame() == 0) {
+		int lineInput, columnInput, orientationInput;
+		string untreatedInput, word;
+		cout << "Position (LCD / CTR-Z = Stop) ? ";
+		cin >> untreatedInput;
+		guardpositions.push_back(untreatedInput);
+
+		if (untreatedInput == "Z")
+		{
+			string outputfile;
+			char option;
+			cout << "Do you want to save the crossword ? (y/n) ";
+			cin >> option;
+			if (option == 'y' || option == 'Y')
+			{
+				cout << "Enter file name: "; cin >> outputfile;
+				a.SaveToFile(outputfile, guardpositions);
+				return 0;
+			}
+			else if (option == 'n' || option == 'N')
+			{
+				cout << " Ok. Bye\n";
+				system("pause");
+				return 0;
+			}
+			else
+				continue;
+		}
+
+
+		cout << "Word (- = remove / ? = help) ? ";
+		cin >> word;
+
+		lineInput = (int)untreatedInput[0] - 65;
+		columnInput = (int)untreatedInput[1] - 97;
+
+
+
+		if (word == "?")
+		{
+			vector<string> words = a.WordsThatFit(lineInput, columnInput, untreatedInput[2]);
+			for (unsigned int i = 0; i < words.size(); i++)
+				cout << words.at(i) << endl;
+
+		}
+		else if (word.at(0) == '-')
+		{
+			word.erase(word.begin());
+			a.removeWord(word);
+			a.DrawBoard();
+		}
+
+		else
+		{
+			a.InsertWord(lineInput, columnInput, untreatedInput[2], word);
+			a.DrawBoard();
+		}
+
+
+		a.CheckEndGame();
+		if (a.getEndGame() == 1)
+		{
+			cout << "VICTORY - Board Filled\n";
+			string outputfile;
+			char option;
+			cout << "Do you want to save the crossword ? (y/n) ";
+			cin >> option;
+			if (option == 'y' || option == 'Y')
+			{
+				cout << "Enter file name: "; cin >> outputfile;
+				a.SaveToFile(outputfile, guardpositions);
+				return 0;
+			}
+			else if (option == 'n' || option == 'N')
+			{
+				cout << " Ok. Bye\n";
+				system("pause");
+				return 0;
+			}
+			else
+				continue;
+		}
+	}
+
+
+
+	system("pause");
+	return 0;
+
+
+}
+int Load_Puzzle()
+{
+	system("cls");
+	string filename, boardname;
+	cout << "Insert the file name (dicionario.txt) : ";
+	cin >> filename;
+	cout << "Insert the file name where the board was guarded : ";
+	cin >> boardname;
+	Board b;
+	b.loadBoard(boardname);
+	b.CheckEndGame();
+	int lines = b.getxSize();
+	int columns = b.getySize();
+	if (b.getEndGame() == 0) {
+		cout << " The board you loaded isn't completed. \n";
+		system("pause");
+		return 0;
+	}
+	
+	b.showClues();
+	
+
+
+	Board a = Board(lines, columns);
+	a.DrawBoard();
+
+	while (a.getEndGame() == 0) {
+		int lineInput, columnInput, orientationInput;
+		string untreatedInput, word;
+		cout << "Position (LCD / CTR-Z = Stop) ? ";
+		cin >> untreatedInput;
+
+		if (untreatedInput == "Z")
+		{
+			string outputfile;
+			char option;
+			cout << "Do you want to give up ? (y/n) ";
+			cin >> option;
+			if (option == 'y' || option == 'Y')
+			{
+				cout << " Ok. Bye\n";
+				system("pause");
+				return 0;
+			}
+			else if (option == 'n' || option == 'N')
+			{
+				cout << "\n Let´s get back on track \n";
+				continue;
+			}
+			else
+				continue;
+		}
+
+
+		cout << "Word (- = remove / ? = help) ? ";
+		cin >> word;
+
+		lineInput = (int)untreatedInput[0] - 65;
+		columnInput = (int)untreatedInput[1] - 97;
+
+
+
+		if (word == "?")
+		{
+			vector<string> words = a.WordsThatFit(lineInput, columnInput, untreatedInput[2]);
+			for (unsigned int i = 0; i < words.size(); i++)
+				cout << words.at(i) << endl;
+
+		}
+		else if (word.at(0) == '-')
+		{
+			word.erase(word.begin());
+			a.removeWord(word);
+			a.DrawBoard();
+		}
+
+		else
+		{
+			a.InsertWord(lineInput, columnInput, untreatedInput[2], word);
+			a.DrawBoard();
+		}
+
+
+		a.CheckEndGame();
+		if (a.getEndGame() == 1 && a == b)
+		{
+			cout << "VICTORY - Board Filled correctely\n";
+			string outputfile;
+			char option;
+			cout << "Do you want to save your information? (y/n) ";
+			cin >> option;
+			if (option == 'y' || option == 'Y')
+			{
+				cout << "Enter file name: "; cin >> outputfile;
+
+				return 0;
+			}
+			else if (option == 'n' || option == 'N')
+			{
+				cout << " Ok. Bye\n";
+				system("pause");
+				return 0;
+			}
+			else
+			{
+				system("pause");
+				return 0;
+			};
+		}
+		else if (a.getEndGame() == 1 ) {
+			cout << " The answer was incorrect.Goodbye \n";
+		}
+	}
+
+	system("pause");
+	return 0;
+}

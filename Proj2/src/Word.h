@@ -12,7 +12,7 @@ private:
 	int horientation;
 
 public:
-	Word();
+	//Word();
 
 	~Word();
 
@@ -25,6 +25,7 @@ public:
 	int getY() const;
 
 	int getHorientation() const;
+
 
 	string getWord() const;
 

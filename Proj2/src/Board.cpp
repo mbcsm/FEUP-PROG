@@ -6,12 +6,52 @@ Board::Board()
 	ySize = 0;
 }
 
+int Board::getxSize()
+{
+	return xSize;
+}
+
+int Board::getySize()
+{
+	return ySize;
+}
+
+vector<vector<string>> Board::getwordVec()
+{
+	vector<vector<string>> words;
+	for (unsigned int i = 0; i < wordVec.size(); i++)
+	{
+		vector<string> inf;
+		inf.push_back(wordVec.at(i).getWord());
+		inf.push_back(to_string(wordVec.at(i).getX()));
+		inf.push_back(to_string(wordVec.at(i).getY()));
+		words.push_back(inf);
+	}
+	return words;
+}
+
 Board::Board(int xSize, int ySize)
 {
 	this->xSize = xSize;
 	this->ySize = ySize;
 }
 
+bool Board::operator== (Board b)
+{
+	vector<vector<string>> words2 = b.getwordVec();
+	vector<vector<string>> words;
+	for (unsigned int i = 0; i < wordVec.size(); i++)
+	{
+		vector<string> inf;
+		inf.push_back(wordVec.at(i).getWord());
+		inf.push_back(to_string(wordVec.at(i).getX()));
+		inf.push_back(to_string(wordVec.at(i).getY()));
+		words.push_back(inf);
+	}
+	sort(words.begin(), words.end());
+	sort(words2.begin(), words2.end());
+	return words == words2;
+}
 void Board::DrawBoard()
 {
 
@@ -40,8 +80,20 @@ void Board::DrawBoard()
 
 
 
-void Board::InsertWord(int x, int y, int Direction, string word)
+void Board::InsertWord(int x, int y, char Direction, string word)
 {
+	transform(word.begin(), word.end(), word.begin(), ::tolower);
+	transform(word.begin(), word.begin()+1, word.begin(), ::toupper);
+	int horientation = -1;
+	if (Direction == 'V' || Direction == 'v')
+		horientation = 0;
+	else if (Direction == 'H' || Direction == 'h')
+		horientation = 1;
+	else
+	{
+		cout << " The direction is incorrect! " << endl;
+		return;
+	}
 
 
 	Dictionary a;
@@ -54,24 +106,24 @@ void Board::InsertWord(int x, int y, int Direction, string word)
 		cout << " Word Already Played" << endl;
 		return;
 	}
-	if (WordFits(x, y, Direction, word) == 1) {
+	if (WordFits(x, y, horientation, word) == 1) {
 		cout << " Word Doesn't Fit" << endl;
 		return;
 	}
 
-	if (WordMatchesWithOtherLetters(x, y, Direction, word) == 1) {
+	if (WordMatchesWithOtherLetters(x, y, horientation, word) == 1) {
 		cout << " Word Doesn't Match With Other Letters" << endl;
 		return;
 	}
 	for (auto & c : word) c = toupper(c);
-	Word newWord = Word(wordVec.size(), x, y, Direction, word);
+	Word newWord = Word(wordVec.size(), x, y, horientation, word);
 	wordVec.push_back(newWord);
 
 }
 
 
 int Board::WordExistsInBoard(string word) {
-	transform(word.begin(), word.end(), word.begin(), ::toupper);
+
 	for (std::vector<int>::size_type i = 0; i != wordVec.size(); i++)
 		if (wordVec[i].getWord() == word && wordVec[i].getWord() != "X")
 			return 1;
@@ -113,20 +165,21 @@ int Board::WordMatchesWithOtherLetters(int x, int y, int horientation, string wo
 
 int Board::WordBlackCells(char** BoardArray) {
 	for (std::vector<int>::size_type i = 0; i != wordVec.size(); i++) {
-			if (wordVec[i].getHorientation() == 0) {
-				if(BoardArray[wordVec[i].getX()][wordVec[i].getY() - 1] == '*')
-					return 0;
-			}
-			else if (wordVec[i].getHorientation() == 1) {
-				for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
-				{
-					char a = wordVec[i].getWord().at(j);
-					BoardArray[wordVec[i].getX()][j + wordVec[i].getY()] = a;
-				}
+		if (wordVec[i].getHorientation() == 0) {
+			if (BoardArray[wordVec[i].getX()][wordVec[i].getY() - 1] == '*')
+				return 0;
+		}
+		else if (wordVec[i].getHorientation() == 1) {
+			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
+			{
+				char a = wordVec[i].getWord().at(j);
+				BoardArray[wordVec[i].getX()][j + wordVec[i].getY()] = a;
 			}
 		}
+	}
 	return 0;
 }
+
 
 char** Board::CreateBoardMatrix() {
 
@@ -151,11 +204,11 @@ char** Board::CreateBoardMatrix() {
 				BoardArray[j + wordVec[i].getX()][wordVec[i].getY()] = a;
 			}
 
-			if(wordVec[i].getX() != 0)
-				if(BoardArray[wordVec[i].getX() - 1][wordVec[i].getY()] == '*')
+			if (wordVec[i].getX() != 0)
+				if (BoardArray[wordVec[i].getX() - 1][wordVec[i].getY()] == '*')
 					BoardArray[wordVec[i].getX() - 1][wordVec[i].getY()] = '#';
-			if(wordVec[i].getX() + wordVec[i].getWord().size() != ySize)
-				if(BoardArray[wordVec[i].getX() + wordVec[i].getWord().size()][wordVec[i].getY()] == '*')
+			if (wordVec[i].getX() + wordVec[i].getWord().size() != ySize)
+				if (BoardArray[wordVec[i].getX() + wordVec[i].getWord().size()][wordVec[i].getY()] == '*')
 					BoardArray[wordVec[i].getX() + wordVec[i].getWord().size()][wordVec[i].getY()] = '#';
 
 		}
@@ -166,11 +219,11 @@ char** Board::CreateBoardMatrix() {
 				BoardArray[wordVec[i].getX()][j + wordVec[i].getY()] = a;
 			}
 
-			if(wordVec[i].getY() != 0)
-				if(BoardArray[wordVec[i].getX()][wordVec[i].getY() - 1] == '*')
+			if (wordVec[i].getY() != 0)
+				if (BoardArray[wordVec[i].getX()][wordVec[i].getY() - 1] == '*')
 					BoardArray[wordVec[i].getX()][wordVec[i].getY() - 1] = '#';
-			if(wordVec[i].getY() + wordVec[i].getWord().size() != xSize)
-				if(BoardArray[wordVec[i].getX()][wordVec[i].getY() + wordVec[i].getWord().size()] == '*')
+			if (wordVec[i].getY() + wordVec[i].getWord().size() != xSize)
+				if (BoardArray[wordVec[i].getX()][wordVec[i].getY() + wordVec[i].getWord().size()] == '*')
 					BoardArray[wordVec[i].getX()][wordVec[i].getY() + wordVec[i].getWord().size()] = '#';
 
 		}
@@ -227,21 +280,122 @@ vector<string> Board::WordsThatFit(int x, int y, int horientation)
 	return wordsViable;
 }
 
-void Board::SaveToFile(string outputfile)
+
+void Board::SaveToFile(string outputfile, vector<string> position)
 {
-/*	ofstream file;
+	ofstream file;
 	file.open(outputfile);
 
-	file << DrawBoard();*/
+	file << xSize << ";" << ySize << endl;
+	for (unsigned int i = 0; i < wordVec.size(); i++)
+		file << position.at(i) << ";" << wordVec.at(i).getWord() << endl;
+		
+	
+
 }
 
 void Board::removeWord(string word)
 {
 	transform(word.begin(), word.end(), word.begin(), ::toupper);
-
-
 	for (unsigned int i = 0; i < wordVec.size(); i++)
 		if (word == wordVec.at(i).getWord())
 			wordVec.erase(wordVec.begin()+i);
+}
+
+void Board::loadBoard(string filename)
+{
+	ifstream file;
+	file.open(filename);
+	if (!file.is_open())
+	{
+		cout << " The file could not be open. ";
+		return;
+	}
+	int id = 0;
+	string line;
+	int linecounter = 0, xSiz = 0, ySiz = 0;
+	string posi = ""; string wordname = ""; string position = "";
+
+	
+	while (!file.eof())
+	{
+		getline(file, line);
+
+		string data;
+		id++;
+		if (line.size() == 0)
+			continue;
+		if (linecounter == 0)
+		{
+			stringstream linestream(line);
+			linestream >> xSiz;
+			getline(linestream, data, ';');  // read up-to the first ; (discard ;).
+			linestream >> ySiz;
+		
+			xSize = xSiz;
+			ySize = ySiz;
+		}
+		else {
+			stringstream linestream(line);
+
+			linestream >> posi;
+			
+			string::size_type pos = posi.find(';');
+			if (posi.npos != pos) {
+				wordname = posi.substr(pos + 1);
+				 position = posi.substr(0, pos);
+			}
+			int x = position.at(0)-65;
+			int y = position.at(1)-97;
+			char horientation = position.at(2);
+
+
+	
+			InsertWord(x,y, horientation, wordname);
+		}
+		linecounter++;
+	} 
+
+}
+
+void Board::showClues()
+{
+	cout << "________________ Clues Table ________________\n";
+	Dictionary a;
+	char ori;
+	vector<int> horizontal;
+	vector<int> vertical;
+	a.getWordFromFile("dicionario.txt");
+	cout << "\n\n";
+	for (unsigned int i = 0; i < wordVec.size(); i++)
+	{
+		if (wordVec.at(i).getHorientation() == 0) {
+			ori = 'V';
+			vertical.push_back(i);
+		}
+		else if (wordVec.at(i).getHorientation() == 1) {
+			ori = 'H';
+			horizontal.push_back(i);
+		}	
+	}
+	cout << "\n Horizontal:\n\n";
+	if (horizontal.size() > 0) {
+		for (unsigned int i = 0; i < wordVec.size(); i++)
+		{
+			if (i == horizontal.at(i))
+				cout << " Synonym: " << a.showSynonym(wordVec.at(i).getWord()) << "   Xpos: " << char(wordVec.at(i).getX() + 65) << "   Ypos: " << char(wordVec.at(i).getY() + 97) << endl;
+			else continue;
+		}
+	}
+	cout << "\n Vertical: \n\n";
+	if (vertical.size() > 0) {
+		for (unsigned int i = 0; i < wordVec.size(); i++)
+		{
+
+			if (i == vertical.at(i))
+				cout << " Synonym: " << a.showSynonym(wordVec.at(i).getWord()) << "   Xpos: " << char(wordVec.at(i).getX() + 65) << "   Ypos: " << char(wordVec.at(i).getY() + 97) << endl;
+			else continue;
+		}
+	}
 
 }

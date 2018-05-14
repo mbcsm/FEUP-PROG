@@ -27,7 +27,6 @@ int Word::getY() const {
 	return this->coords.second;
 }
 
-
 int Word::getHorientation() const {
 	return this->horientation;
 }
