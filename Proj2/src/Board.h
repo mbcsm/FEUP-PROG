@@ -21,7 +21,7 @@ public:
 	void DrawBoard();
 	int WordExistsInBoard(string word);
 	int WordFits(int x, int y, int horientation, string word);
-	void InsertWord(int x, int y, char Direction, string word);
+	void InsertWord(int x, int y, int Direction, string word);
 	int WordMatchesWithOtherLetters(int x, int y, int horientation, string word);
 	int WordBlackCells(char** BoardArray);
 	char** CreateBoardMatrix();

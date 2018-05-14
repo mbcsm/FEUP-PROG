@@ -40,18 +40,8 @@ void Board::DrawBoard()
 
 
 
-void Board::InsertWord(int x, int y, char Direction, string word)
+void Board::InsertWord(int x, int y, int Direction, string word)
 {
-	int horientation = -1;
-	if (Direction == 'V' || Direction == 'v')
-		horientation = 0;
-	else if (Direction == 'H' || Direction == 'h')
-		horientation = 1;
-	else
-	{
-		cout << " The direction is incorrect! " << endl;
-		return;
-	}
 
 
 	Dictionary a;
@@ -64,23 +54,24 @@ void Board::InsertWord(int x, int y, char Direction, string word)
 		cout << " Word Already Played" << endl;
 		return;
 	}
-	if (WordFits(x, y, horientation, word) == 1) {
+	if (WordFits(x, y, Direction, word) == 1) {
 		cout << " Word Doesn't Fit" << endl;
 		return;
 	}
 
-	if (WordMatchesWithOtherLetters(x, y, horientation, word) == 1) {
+	if (WordMatchesWithOtherLetters(x, y, Direction, word) == 1) {
 		cout << " Word Doesn't Match With Other Letters" << endl;
 		return;
 	}
 	for (auto & c : word) c = toupper(c);
-	Word newWord = Word(wordVec.size(), x, y, horientation, word);
+	Word newWord = Word(wordVec.size(), x, y, Direction, word);
 	wordVec.push_back(newWord);
 
 }
 
 
 int Board::WordExistsInBoard(string word) {
+	transform(word.begin(), word.end(), word.begin(), ::toupper);
 	for (std::vector<int>::size_type i = 0; i != wordVec.size(); i++)
 		if (wordVec[i].getWord() == word && wordVec[i].getWord() != "X")
 			return 1;
@@ -217,16 +208,23 @@ vector<string> Board::WordsThatFit(int x, int y, int horientation)
 	Dictionary a;
 
 	vector<string> words = a.getWordFromFile("dicionario.txt");
+	vector<string> wordsViable;
 	for (unsigned int i = 0; i < words.size(); i++)
 	{
-		if (WordMatchesWithOtherLetters(x, y, horientation, words.at(i)) == 1)
-			words.erase(words.begin() + i);
-		else if (WordExistsInBoard(words.at(i)) == 1)
-			words.erase(words.begin() + i);
+
+		if (WordExistsInBoard(words.at(i)) == 1)
+			continue;
+
 		else if (WordFits(x, y, horientation, words.at(i)) == 1)
-			words.erase(words.begin() + i);
+			continue;
+
+		else if (WordMatchesWithOtherLetters(x, y, horientation, words.at(i)) == 1)
+			continue;
+
+		wordsViable.push_back(words.at(i));
+
 	}
-	return words;
+	return wordsViable;
 }
 
 void Board::SaveToFile(string outputfile)

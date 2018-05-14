@@ -93,17 +93,36 @@ int Create_Puzzle()
 		}
 
 
-		cout << "Word (- = remove / ? = help) ? ";
-		cin >> word;
-
 		lineInput = (int)untreatedInput[0] - 65;
 		columnInput = (int)untreatedInput[1] - 97;
 
+		int horientation = -1;
+
+		if (untreatedInput[2] == 'V' || untreatedInput[2] == 'v')
+				horientation = 0;
+		else if (untreatedInput[2] == 'H' || untreatedInput[2] == 'h')
+			horientation = 1;
+		else{
+			cout << "Invalid Direction" << endl;
+			continue;
+		}
+
+		if(islower(untreatedInput.at(0)) || isupper(untreatedInput.at(1))){
+			cout << "Invalid Position, Make sure the (Line) is Uppercase and the (Column) Lowercase" << endl;
+			continue;
+		}
+		if(lineInput > lines || columnInput > columns){
+			cout << "Invalid Position" << endl;
+			continue;
+		}
+
+		cout << "Word (- = remove / ? = help) ? ";
+		cin >> word;
 
 
 		if (word == "?")
 		{
-			vector<string> words = a.WordsThatFit(lineInput, columnInput, untreatedInput[2]);
+			vector<string> words = a.WordsThatFit(lineInput, columnInput, horientation);
 			for (unsigned int i = 0; i < words.size(); i++)
 				cout << words.at(i) << endl;
 		
@@ -117,7 +136,7 @@ int Create_Puzzle()
 
 		else
 		{
-			a.InsertWord(lineInput, columnInput, untreatedInput[2], word);
+			a.InsertWord(lineInput, columnInput, horientation, word);
 			a.DrawBoard();
 		}
 
