@@ -2,11 +2,12 @@
 #include "Proj.h"
 #include "Board.h"
 #include "Dictionary.h"
+#include "Player.h"
 using namespace std;
 int Create_Puzzle();
 int Resume_Puzzle();
 int Load_Puzzle();
-
+int Load_Player();
 int main()
 {
 	
@@ -22,6 +23,7 @@ int main()
 		cout << "   1- Create a Puzzle \n" << endl;
 		cout << "   2- Resume a Puzzle \n" << endl;
 		cout << "   3- Load Puzzle \n\n" << endl;
+		cout << "   4- Player \n\n" << endl;
 
 		cout << "   0- Exit \n\n\n" << endl;
 		cout << "   Select an option: "; cin >> op;
@@ -39,6 +41,9 @@ int main()
 		case 3:
 			Load_Puzzle();
 			break;
+		case 4:
+			Load_Player();
+			break;
 		default:
 
 			main();
@@ -49,10 +54,6 @@ int main()
 
 	return 0;
 }
-
-
-
-
 
 
 int Create_Puzzle()
@@ -143,7 +144,7 @@ int Create_Puzzle()
 
 		else
 		{
-			a.InsertWord(lineInput, columnInput, untreatedInput[2], word);
+			a.InsertWord(lineInput, columnInput, untreatedInput[2], word, false);
 			a.DrawBoard();
 		}
 
@@ -188,7 +189,7 @@ int Resume_Puzzle()
 	cout << "Insert the file name where the board was guarded : ";
 	cin >> boardname;
 	Board a;
-	a.loadBoard(boardname);
+	a.loadBoard(boardname, false);
 
 	a.DrawBoard();
 	vector<string> guardpositions;
@@ -199,10 +200,7 @@ int Resume_Puzzle()
 		cout << " The board is already completed. \n";
 		system("pause");
 		return 0;
-
 	}
-
-
 
 	while (a.getEndGame() == 0) {
 		int lineInput, columnInput, orientationInput;
@@ -258,7 +256,7 @@ int Resume_Puzzle()
 
 		else
 		{
-			a.InsertWord(lineInput, columnInput, untreatedInput[2], word);
+			a.InsertWord(lineInput, columnInput, untreatedInput[2], word, false);
 			a.DrawBoard();
 		}
 
@@ -292,9 +290,8 @@ int Resume_Puzzle()
 
 	system("pause");
 	return 0;
-
-
 }
+
 int Load_Puzzle()
 {
 	system("cls");
@@ -304,7 +301,7 @@ int Load_Puzzle()
 	cout << "Insert the file name where the board was guarded : ";
 	cin >> boardname;
 	Board b;
-	b.loadBoard(boardname);
+	b.loadBoard(boardname, false);
 	b.CheckEndGame();
 	int lines = b.getxSize();
 	int columns = b.getySize();
@@ -313,10 +310,7 @@ int Load_Puzzle()
 		system("pause");
 		return 0;
 	}
-	
 	b.showClues();
-	
-
 
 	Board a = Board(lines, columns);
 	a.DrawBoard();
@@ -373,7 +367,7 @@ int Load_Puzzle()
 
 		else
 		{
-			a.InsertWord(lineInput, columnInput, untreatedInput[2], word);
+			a.InsertWord(lineInput, columnInput, untreatedInput[2], word, false);
 			a.DrawBoard();
 		}
 
@@ -408,6 +402,134 @@ int Load_Puzzle()
 			cout << " The answer was incorrect.Goodbye \n";
 		}
 	}
+
+	system("pause");
+	return 0;
+}
+
+
+int Load_Player(){
+
+	system("cls");
+	string filename, boardname;
+	cout << "Insert the file name (dicionario.txt) : ";
+	cin >> filename;
+	cout << "Insert the file name where the board was guarded : ";
+	cin >> boardname;
+	Board a;
+	a.loadBoard(boardname, true);
+
+	a.showClues();
+
+	a.DrawBoard();
+	vector<string> guardpositions;
+
+
+	while (a.getEndGame() == 0) {
+		int lineInput, columnInput, orientationInput;
+		string untreatedInput, word;
+		cout << "Position (LCD / CTR-Z = Stop) ? ";
+		cin >> untreatedInput;
+		guardpositions.push_back(untreatedInput);
+
+		if (untreatedInput == "Z")
+		{
+			string outputfile;
+			char option;
+			cout << "Do you want to save the crossword ? (y/n) ";
+			cin >> option;
+			if (option == 'y' || option == 'Y')
+			{
+				cout << "Enter file name: "; cin >> outputfile;
+				a.SaveToFile(outputfile, guardpositions);
+				return 0;
+			}
+			else if (option == 'n' || option == 'N')
+			{
+				cout << " Ok. Bye\n";
+				system("pause");
+				return 0;
+			}
+			else
+				continue;
+		}
+
+
+
+		lineInput = (int)untreatedInput[0] - 65;
+		columnInput = (int)untreatedInput[1] - 97;
+
+		int horientation = -1;
+
+		if (untreatedInput[2] == 'V' || untreatedInput[2] == 'v')
+				horientation = 0;
+		else if (untreatedInput[2] == 'H' || untreatedInput[2] == 'h')
+			horientation = 1;
+		else{
+			cout << "Invalid Direction" << endl;
+			continue;
+		}
+
+		if(islower(untreatedInput.at(0)) || isupper(untreatedInput.at(1))){
+			cout << "Invalid Position, Make sure the (Line) is Uppercase and the (Column) Lowercase" << endl;
+			continue;
+		}
+		if(lineInput > a.getxSize() || columnInput > a.getySize()){
+			cout << "Invalid Position" << endl;
+			continue;
+		}
+
+		cout << "Word (- = remove / ? = help) ? ";
+		cin >> word;
+
+
+		if (word == "?")
+		{
+			vector<string> words = a.WordsThatFit(lineInput, columnInput, horientation);
+			for (unsigned int i = 0; i < words.size(); i++)
+				cout << words.at(i) << endl;
+
+		}
+		else if (word.at(0) == '-')
+		{
+			word.erase(word.begin());
+			a.removeWord(word);
+			a.DrawBoard();
+		}
+
+		else
+		{
+			a.InsertWord(lineInput, columnInput, untreatedInput[2], word, false);
+			a.DrawBoard();
+		}
+
+
+		a.CheckEndGame();
+		if (a.getEndGame() == 1)
+		{
+			cout << "VICTORY - Board Filled\n";
+			string outputfile;
+			char option;
+			cout << "Do you want to save the crossword ? (y/n) ";
+			cin >> option;
+			if (option == 'y' || option == 'Y')
+			{
+				cout << "Enter file name: "; cin >> outputfile;
+				a.SaveToFile(outputfile, guardpositions);
+				return 0;
+			}
+			else if (option == 'n' || option == 'N')
+			{
+				cout << " Ok. Bye\n";
+				system("pause");
+				return 0;
+			}
+			else
+				continue;
+		}
+	}
+
+
 
 	system("pause");
 	return 0;

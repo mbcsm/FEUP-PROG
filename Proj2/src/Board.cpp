@@ -80,7 +80,7 @@ void Board::DrawBoard()
 
 
 
-void Board::InsertWord(int x, int y, char Direction, string word)
+void Board::InsertWord(int x, int y, char Direction, string word, bool showWords)
 {
 	transform(word.begin(), word.end(), word.begin(), ::tolower);
 	transform(word.begin(), word.begin()+1, word.begin(), ::toupper);
@@ -116,8 +116,9 @@ void Board::InsertWord(int x, int y, char Direction, string word)
 		return;
 	}
 	for (auto & c : word) c = toupper(c);
-	Word newWord = Word(wordVec.size(), x, y, horientation, word);
+	Word newWord = Word(wordVec.size(), x, y, horientation, word, showWords);
 	wordVec.push_back(newWord);
+
 
 }
 
@@ -125,7 +126,7 @@ void Board::InsertWord(int x, int y, char Direction, string word)
 int Board::WordExistsInBoard(string word) {
 
 	for (std::vector<int>::size_type i = 0; i != wordVec.size(); i++)
-		if (wordVec[i].getWord() == word && wordVec[i].getWord() != "X")
+		if (wordVec[i].getWord() == word && wordVec[i].getWord() != "X" && !wordVec[i].isHidden())
 			return 1;
 
 	return 0;
@@ -177,6 +178,7 @@ int Board::WordBlackCells(char** BoardArray) {
 			}
 		}
 	}
+
 	return 0;
 }
 
@@ -198,10 +200,12 @@ char** Board::CreateBoardMatrix() {
 
 	for (std::vector<int>::size_type i = 0; i != wordVec.size(); i++) {
 		if (wordVec[i].getHorientation() == 0) {
+			if(!wordVec[i].isHidden())
 			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
 			{
 				char a = wordVec[i].getWord().at(j);
-				BoardArray[j + wordVec[i].getX()][wordVec[i].getY()] = a;
+				if(!wordVec[i].isHidden())
+					BoardArray[j + wordVec[i].getX()][wordVec[i].getY()] = a;
 			}
 
 			if (wordVec[i].getX() != 0)
@@ -213,6 +217,7 @@ char** Board::CreateBoardMatrix() {
 
 		}
 		else if (wordVec[i].getHorientation() == 1) {
+			if(!wordVec[i].isHidden())
 			for (unsigned int j = 0; j < wordVec[i].getWord().size(); j++)
 			{
 				char a = wordVec[i].getWord().at(j);
@@ -298,12 +303,13 @@ void Board::removeWord(string word)
 {
 	transform(word.begin(), word.end(), word.begin(), ::toupper);
 	for (unsigned int i = 0; i < wordVec.size(); i++)
-		if (word == wordVec.at(i).getWord())
+		if (word == wordVec.at(i).getWord() && !wordVec.at(i).isHidden())
 			wordVec.erase(wordVec.begin()+i);
 }
 
-void Board::loadBoard(string filename)
+void Board::loadBoard(string filename, bool showWords)
 {
+	playerMode = !showWords;
 	ifstream file;
 	file.open(filename);
 	if (!file.is_open())
@@ -351,7 +357,7 @@ void Board::loadBoard(string filename)
 
 
 	
-			InsertWord(x,y, horientation, wordname);
+			InsertWord(x,y, horientation, wordname, showWords);
 		}
 		linecounter++;
 	} 
@@ -383,7 +389,8 @@ void Board::showClues()
 		for (unsigned int i = 0; i < wordVec.size(); i++)
 		{
 			if (i == horizontal.at(i))
-				cout << " Synonym: " << a.showSynonym(wordVec.at(i).getWord()) << "   Xpos: " << char(wordVec.at(i).getX() + 65) << "   Ypos: " << char(wordVec.at(i).getY() + 97) << endl;
+				if(wordVec.at(i).isHidden())
+					cout << " Synonym: " << a.showSynonym(wordVec.at(i).getWord()) << "   Xpos: " << char(wordVec.at(i).getX() + 65) << "   Ypos: " << char(wordVec.at(i).getY() + 97) << endl;
 			else continue;
 		}
 	}
@@ -393,7 +400,8 @@ void Board::showClues()
 		{
 
 			if (i == vertical.at(i))
-				cout << " Synonym: " << a.showSynonym(wordVec.at(i).getWord()) << "   Xpos: " << char(wordVec.at(i).getX() + 65) << "   Ypos: " << char(wordVec.at(i).getY() + 97) << endl;
+				if(wordVec.at(i).isHidden())
+					cout << " Synonym: " << a.showSynonym(wordVec.at(i).getWord()) << "   Xpos: " << char(wordVec.at(i).getX() + 65) << "   Ypos: " << char(wordVec.at(i).getY() + 97) << endl;
 			else continue;
 		}
 	}
